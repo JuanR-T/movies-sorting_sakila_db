@@ -74,6 +74,7 @@ $movies = $result->fetchAll(PDO::FETCH_ASSOC);
 //Display table
 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
