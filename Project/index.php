@@ -17,32 +17,21 @@ $query->execute();
 $resultMovies = $query->fetch();
 $nbMovies = (int) $resultMovies['nb_film'];
 
-// Combien de locations par films ?
-
-$sqlTotalRentals = "SELECT COUNT(inventory.inventory_id) 
-FROM rental 
-LEFT JOIN inventory 
-ON rental.inventory_id = inventory.inventory_id 
-WHERE film.film_id = inventory.film_id) as rentals";
-
-$query = $databaseConnection->prepare($sqlTotalRentals);
-$query->execute();
-$resultRentals = $query->fetch();
-$nbRentals = (int) $resultRentals['nb_rentals'];
-var_dump($nbRentals);
-
 //Sorting
 
-$getSorting = "";
-$order = "";
 if (isset($_GET['categories']) && !empty($_GET['categories'])) {
     $getSorting = $_GET['categories'];
     $order = "ORDER BY" . " " . $_GET['categories'];
+} else {
+    $getSorting = "";
+    $order = "";
 }
 
-$moviesPerPage = 10;
+
 if (isset($_GET['moviesPerPage']) && !empty($_GET['moviesPerPage'])) {
     $moviesPerPage = $_GET['moviesPerPage'];
+} else {
+    $moviesPerPage = 10;
 }
 
 //Combien de pages me faut-il ?
@@ -53,6 +42,9 @@ $pagesMax = $pagesNumber;
 //Premier film de la liste
 
 $firstMovie = ($currentPage * $moviesPerPage) - $moviesPerPage;
+
+//Sql request
+
 $sqlPages = "SELECT film.film_id, title, rental_rate, rating, category.name, 
 COUNT(rental.rental_id) as nb_rentals FROM film 
 LEFT JOIN film_category ON film.film_id = film_category.film_id
@@ -85,54 +77,6 @@ $movies = $result->fetchAll(PDO::FETCH_ASSOC);
     <title>SGBDR</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <style>
-        html {
-            font-family: Tahoma, Geneva, sans-serif;
-            padding: 10px;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 500px;
-        }
-
-        th {
-            background-color: #54585d;
-            border: 1px solid #54585d;
-        }
-
-        th:hover {
-            background-color: #64686e;
-        }
-
-        th a {
-            display: block;
-            text-decoration: none;
-            padding: 10px;
-            color: #ffffff;
-            font-weight: bold;
-            font-size: 13px;
-        }
-
-        th a i {
-            margin-left: 5px;
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        td {
-            padding: 10px;
-            color: #636363;
-            border: 1px solid #dddfe1;
-        }
-
-        tr {
-            background-color: #ffffff;
-        }
-
-        tr .highlight {
-            background-color: #f9fafb;
-        }
-    </style>
 </head>
 
 <body>
@@ -148,7 +92,7 @@ $movies = $result->fetchAll(PDO::FETCH_ASSOC);
                 <option value="100">Afficher 100 films</option>
             </select>
             <select class="browser-default custom-select mx-2" name="categories">
-                <option value="">Trié par :</option>
+                <option value="" disabled selected>Trier par : <?= $getSorting ?></option>
                 <option value="title ASC">Titre ascendant</option>
                 <option value="title DESC">Titre descendant</option>
                 <option value="name ASC">Categorie ascendante</option>
